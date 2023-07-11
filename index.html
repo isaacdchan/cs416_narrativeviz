@@ -47,7 +47,7 @@
        .attr("y", function(d) { return yScale(d.value); })
        .attr("width", xScale.bandwidth())
        .attr("height", function(d) { return height - yScale(d.value); })
-       .attr("fill", "steelblue");
+       .attr("fill", "black");
 
     // Add labels to the bars
     svg.selectAll("text")
@@ -58,7 +58,7 @@
        .attr("x", function(d) { return xScale(d.year) + xScale.bandwidth() / 2; })
        .attr("y", function(d) { return yScale(d.value) - 5; })
        .attr("text-anchor", "middle")
-       .attr("fill", "white");
+       .attr("fill", "black");
 
     // Add x-axis
     svg.append("g")

@@ -1,75 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bar Chart with D3.js</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .bar {
+      fill: steelblue;
+      cursor: pointer;
+    }
+    .bar:hover {
+      fill: orange;
+    }
+    .x-axis path,
+    .y-axis path {
+      fill: none;
+      stroke: #000;
+    }
+    .x-axis text,
+    .y-axis text {
+      font-size: 12px;
+    }
+    .chart-title {
+      font-size: 20px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+  </style>
 </head>
 <body>
+  <h2>How do the most popular grains compare nutrition wise?</h2>
+  <p>Click on each grain's bar to see their nutritional breakdown. Are the more popular ones healthier?<p>
+
   <div id="chart"></div>
 
   <script>
-    // Sample data
     var data = [
-      { year: "2015", value: 10 },
-      { year: "2016", value: 20 },
-      { year: "2017", value: 15 },
-      { year: "2018", value: 25 },
-      { year: "2019", value: 30 }
+      { category: "Corn", value: 1151.36, url: "corn.html" },
+      { category: "Wheat", value: 783.8, url: "wheat.html" },
+      { category: "Rice", value: 502.98, url: "rice.html" },
+      { category: "Barley", value: 150.48, url: "barley.html" },
     ];
 
-    // Chart dimensions
-    var width = 500;
-    var height = 300;
-    var barPadding = 5;
+    var margin = { top: 40, right: 20, bottom: 30, left: 80 };
+    var width = 500 - margin.left - margin.right;
+    var height = 400 - margin.top - margin.bottom;
 
-    // Create the SVG container
-    var svg = d3.select("#chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+    var svg = d3
+      .select("#chart")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Define the scales
-    var xScale = d3.scaleBand()
-                   .domain(data.map(function(d) { return d.year; }))
-                   .range([0, width])
-                   .padding(barPadding);
+    var x = d3
+      .scaleBand()
+      .range([0, width])
+      .padding(0.1)
+      .domain(data.map(function(d) {
+        return d.category;
+      }));
 
-    var yScale = d3.scaleLinear()
-                   .domain([0, d3.max(data, function(d) { return d.value; })])
-                   .range([height, 0]);
+    var y = d3
+      .scaleLinear()
+      .range([height, 0])
+      .domain([0, d3.max(data, function(d) {
+        return d.value;
+      })]);
 
-    // Create the bars
-    svg.selectAll("rect")
-       .data(data)
-       .enter()
-       .append("rect")
-       .attr("x", function(d) { return xScale(d.year); })
-       .attr("y", function(d) { return yScale(d.value); })
-       .attr("width", xScale.bandwidth())
-       .attr("height", function(d) { return height - yScale(d.value); })
-       .attr("fill", "black");
+    var bars = svg.selectAll(".bar")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) {
+        return x(d.category);
+      })
+      .attr("y", function(d) {
+        return y(d.value);
+      })
+      .attr("width", x.bandwidth())
+      .attr("height", function(d) {
+        return height - y(d.value);
+      })
+      .attr("fill", "steelblue")
+      .on("click", function(event) {
+        var clickedData = d3.select(this).datum();
+        window.location.href = clickedData.url;
+      });
 
-    // Add labels to the bars
-    svg.selectAll("text")
-       .data(data)
-       .enter()
-       .append("text")
-       .text(function(d) { return d.value; })
-       .attr("x", function(d) { return xScale(d.year) + xScale.bandwidth() / 2; })
-       .attr("y", function(d) { return yScale(d.value) - 5; })
-       .attr("text-anchor", "middle")
-       .attr("fill", "black");
-
-    // Add x-axis
     svg.append("g")
-       .attr("transform", "translate(0," + height + ")")
-       .call(d3.axisBottom(xScale));
+      .attr("class", "x-axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
 
-    // Add y-axis
     svg.append("g")
-       .call(d3.axisLeft(yScale));
+      .attr("class", "y-axis")
+      .call(d3.axisLeft(y));
 
+    svg.append("text")
+      .attr("class", "x-axis-label")
+      .attr("x", width / 2)
+      .attr("y", height + margin.bottom)
+      .attr("text-anchor", "middle")
+      .text("Grains");
+
+    svg.append("text")
+      .attr("class", "y-axis-label")
+      .attr("x", -margin.left - 150)
+      .attr("y", -margin.top - 20)
+      .attr("text-anchor", "start")
+      .attr("transform", "rotate(-90)")
+      .text("Mil. Metric Tonnes");
+
+    svg.append("text")
+      .attr("class", "chart-title")
+      .attr("x", width / 2)
+      .attr("y", -margin.top / 4)
+      .attr("transform", "translate(0," + -15 + ")")
+      .text("Top 4 Grains by Production Weight (2023)");
   </script>
 </body>
 </html>
-
